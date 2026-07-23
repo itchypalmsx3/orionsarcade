@@ -11,7 +11,8 @@ game_choice = st.sidebar.radio("Choose a game:", [
     "🪙 Coin Toss", 
     "✊ Rock, Paper, Scissors",
     "🎲 Dice Roller",
-    "🎱 Magic 8-Ball"
+    "🎱 Magic 8-Ball",
+    "❌ Tic-Tac-Toe ⭕"
 ])
 
 # ---------------------------------------------------------
@@ -122,3 +123,64 @@ elif game_choice == "🎱 Magic 8-Ball":
             st.subheader(f"🎱 Answer: {random.choice(responses)}")
         else:
             st.warning("Please type a question first!")
+
+# ---------------------------------------------------------
+# GAME 6: TIC-TAC-TOE
+# ---------------------------------------------------------
+elif game_choice == "❌ Tic-Tac-Toe ⭕":
+    st.title("❌ Tic-Tac-Toe ⭕")
+    st.write("Play 2-player Tic-Tac-Toe on the same screen!")
+
+    # Initialize 3x3 board state
+    if "board" not in st.session_state:
+        st.session_state.board = [" "] * 9
+        st.session_state.turn = "❌"
+        st.session_state.winner = None
+
+    # Check for winner function
+    def check_winner(b):
+        lines = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], # rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], # cols
+            [0, 4, 8], [2, 4, 6]             # diagonals
+        ]
+        for line in lines:
+            if b[line[0]] == b[line[1]] == b[line[2]] != " ":
+                return b[line[0]]
+        if " " not in b:
+            return "Tie"
+        return None
+
+    # Display Winner / Current Turn Status
+    if st.session_state.winner:
+        if st.session_state.winner == "Tie":
+            st.info("🤝 It's a tie!")
+        else:
+            st.balloons()
+            st.success(f"🎉 {st.session_state.winner} Wins!")
+    else:
+        st.subheader(f"Current Turn: {st.session_state.turn}")
+
+    # Render 3x3 Grid
+    for i in range(3):
+        cols = st.columns(3)
+        for j in range(3):
+            index = i * 3 + j
+            button_label = st.session_state.board[index]
+            if button_label == " ":
+                button_label = " "  # Blank display
+
+            if cols[j].button(button_label if button_label != " " else "➖", key=f"btn_{index}"):
+                if st.session_state.board[index] == " " and not st.session_state.winner:
+                    st.session_state.board[index] = st.session_state.turn
+                    st.session_state.winner = check_winner(st.session_state.board)
+                    if not st.session_state.winner:
+                        st.session_state.turn = "⭕" if st.session_state.turn == "❌" else "❌"
+                    st.rerun()
+
+    # Reset Button
+    if st.button("Reset Game 🔄"):
+        st.session_state.board = [" "] * 9
+        st.session_state.turn = "❌"
+        st.session_state.winner = None
+        st.rerun()
